@@ -10,6 +10,10 @@ const settings = {
 };
 
 const sketch = ({ context, width, height }) => {
+  random.setSeed("domestika");
+  console.log(random.value());
+  console.log(random.value());
+  console.log(random.value());
   let x, y, w, h, fill, stroke, blend;
   const degrees = -30;
   const num = 40 ; 
@@ -39,7 +43,7 @@ const sketch = ({ context, width, height }) => {
     stroke =  random.pick(rectColors).hex;
     blend = (random.value() > 0.5) ? 'overlay' : 'source-over'; 
 
-    rects.push({x, y, w, h, fill, stroke});
+    rects.push({x, y, w, h, fill, stroke, blend});
   }
   return ({ context, width, height }) => {
     context.fillStyle = bgColor;
