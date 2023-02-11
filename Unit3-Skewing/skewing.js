@@ -1,39 +1,72 @@
 const canvasSketch = require('canvas-sketch');
 const math = require('canvas-sketch-util/math');
 const random = require('canvas-sketch-util/random');
+const Color = require('canvas-sketch-util/color');
+const risoColors = require('riso-colors');
 
 const settings = {
-  dimensions: [ 1080, 1080 ]
+  dimensions: [ 1080, 1080 ], 
+  animate: true
 };
 
 const sketch = ({ context, width, height }) => {
-  let x,y, w, h;
-  
+  let x, y, w, h, fill, stroke, blend;
   const degrees = -30;
   const num = 20; 
   const rects = [];
 
+  const rectColors = [
+    random.pick(risoColors),
+    random.pick(risoColors),
+  ];
+  
+  const bgColor = random.pick(risoColors).hex;
+  
   for(let i = 0; i < num; i++ ){
     x = random.range(0, width);
     y = random.range(0, height); 
     w = random.range(200, 600); 
     h = random.range(40, 200); 
 
-    rects.push({x, y, w, h});
+    fill =  random.pick(rectColors).hex; 
+    stroke =  random.pick(rectColors).hex;
+    blend = (random.value() > 0.5) ? 'overlay' : 'source-over'; 
+
+    rects.push({x, y, w, h, fill, stroke});
   }
   return ({ context, width, height }) => {
-    context.fillStyle = 'white';
+    context.fillStyle = bgColor;
     context.fillRect(0, 0, width, height);
    rects.forEach(rect => {
 
-      const {x, y, w, h} = rect;
+      const {x, y, w, h, fill, stroke, blend} = rect;
+      let shadowColor; 
       context.save();
       context.translate(x, y);
 
-      context.strokeStyle = 'blue'; 
+      context.strokeStyle = stroke;
+      context.fillStyle = fill; 
+      context.lineWidth = 10;
+
+      context.globalCompositeOperation = blend
 
       drawSkewedRect({context, w, h, degrees});
+      shadowColor = Color.offsetHSL(fill, 0, 0, -20); 
+      context.shadowColor = Color.style(shadowColor.rgba);
+      shadowColor.rgba[3] = 0.5; 
+
+      context.shadowOffsetX = -10; 
+      context.shadowOffsety = 20; 
+
+      context.fill(); 
+
+      context.shadowColor = null; 
       context.stroke();
+      context.globalCompositeOperation = 'source-over'; 
+
+      context.lineWidth = 2; 
+      context.strokeStyle = "black"; 
+      context.stroke(); 
 
       context.restore();
     });
