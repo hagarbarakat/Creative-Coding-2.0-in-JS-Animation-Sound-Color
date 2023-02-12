@@ -1,15 +1,22 @@
 const canvasSketch = require('canvas-sketch');
 
 const settings = {
-  dimensions: [ 1080, 1080 ]
+  dimensions: [ 1080, 1080 ],
+  animate: true
 };
 
-const sketch = () => {
-  const points = [
+let points; 
+let elCanvas; 
+
+const sketch = ({canvas}) => {
+  points = [
     new Point({ x: 200, y: 540 }),
     new Point({ x: 400, y:300, control: true }),
     new Point({ x: 880, y: 540 }),
   ];
+
+  canvas.addEventListener('mousedown', onMouseDown);
+  elCanvas = canvas;
 
   return ({ context, width, height }) => {
     context.fillStyle = 'white';
@@ -25,6 +32,34 @@ const sketch = () => {
     });
       
   };
+};
+const onMouseDown = (e) => {
+  window.addEventListener('mousemove', onMouseMove); 
+  window.addEventListener('mouseup', onMouseUp);
+  const x = (e.offsetX / elCanvas.offsetWidth) * elCanvas.width;
+  const y = (e.offsetY/ elCanvas.offsetHeight) * elCanvas.height;
+
+  points.forEach(point => {
+    point.isDragging = point.hitTest(x, y);
+  });
+
+};
+
+const onMouseMove = (e) => {
+  const x = (e.offsetX / elCanvas.offsetWidth) * elCanvas.width;
+  const y = (e.offsetY/ elCanvas.offsetHeight) * elCanvas.height;
+
+  points.forEach(point => {
+    if(point.isDragging){
+      point.x = x; 
+      point.y = y;
+    } 
+  });
+};
+
+const onMouseUp = () => {
+  window.removeEventListener('mousemove', onMouseMove); 
+  window.removeEventListener('mouseup', onMouseUp);
 };
 
 canvasSketch(sketch, settings);
@@ -44,5 +79,12 @@ class Point{
     context.arc(0, 0, 10, 0, Math.PI * 2); 
     context.fill();
     context.restore();
+  }
+  hitTest(x, y){
+    const dx = this.x - x;
+    const dy = this.y - y; 
+    const dd = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2))
+
+    return dd < 20; 
   }
 }
