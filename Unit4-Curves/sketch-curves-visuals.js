@@ -136,3 +136,4 @@ class Point{
     context.restore();
   }
 }
+
